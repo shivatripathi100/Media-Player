@@ -29,6 +29,9 @@ const format = (seconds) => {
   return `${mm}:${ss}`;
 };
 
+
+let count = 0
+
 function App() {
   const [state, setState] = useState({
     playing: true,
@@ -43,7 +46,7 @@ function App() {
   const [timeDisplayFormat, setTimeDisplayFormat] = useState('normal');
   const [bookmarks, setBookmarks] = useState([]);
 
-  const { playing, muted, volume, playbackRate, played, seeking, currentVideoIndex } = state;
+  const { playing, muted, volume, playbackRate, played, currentVideoIndex } = state;
 
   const playerRef = useRef(null);
   const playerContainerRef = useRef(null);
@@ -94,6 +97,13 @@ function App() {
   };
 
   const handleProgress = (changeState) => {
+    if (count > 3) {
+      controlsRef.current.style.visibility = "hidden";
+      count = 0;
+    }
+    if (controlsRef.current.style.visibility == "visible") {
+      count += 1;
+    }
     if (!state.seeking) {
       setState({ ...state, ...changeState });
     }
@@ -110,6 +120,11 @@ function App() {
   const handleSeekMouseUp = (e, newValue) => {
     setState({ ...state, seeking: false });
     playerRef.current.seekTo(newValue / 100, 'fraction');
+  };
+
+  const handleMouseMove = () => {
+    controlsRef.current.style.visibility = "visible";
+    count = 0;
   };
 
   const handleChangeDisplayFormat = () => {
@@ -185,7 +200,8 @@ function App() {
       </AppBar>
       <Toolbar />
       <Container maxWidth='md'>
-        <PlayerWrapper ref={playerContainerRef}>
+        <PlayerWrapper ref={playerContainerRef}
+          onMouseMove={handleMouseMove}>
           <ReactPlayer
             ref={playerRef}
             width={'100%'}
