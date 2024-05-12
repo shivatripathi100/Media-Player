@@ -29,9 +29,6 @@ const format = (seconds) => {
   return `${mm}:${ss}`;
 };
 
-
-let count = 0
-
 function App() {
   const [state, setState] = useState({
     playing: true,
@@ -97,13 +94,6 @@ function App() {
   };
 
   const handleProgress = (changeState) => {
-    if (count > 3) {
-      controlsRef.current.style.visibility = "hidden";
-      count = 0;
-    }
-    if (controlsRef.current.style.visibility == "visible") {
-      count += 1;
-    }
     if (!state.seeking) {
       setState({ ...state, ...changeState });
     }
@@ -120,11 +110,6 @@ function App() {
   const handleSeekMouseUp = (e, newValue) => {
     setState({ ...state, seeking: false });
     playerRef.current.seekTo(newValue / 100, 'fraction');
-  };
-
-  const handleMouseMove = () => {
-    controlsRef.current.style.visibility = "visible";
-    count = 0;
   };
 
   const handleChangeDisplayFormat = () => {
@@ -171,19 +156,52 @@ function App() {
     }));
   };
 
-
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (!state.seeking && playing) {
-        setState((prevState) => ({
-          ...prevState,
-          played: playerRef.current.getCurrentTime() / playerRef.current.getDuration(),
-        }));
+    const handleKeyDown = (event) => {
+      switch (event.keyCode) {
+        case 32:
+          handlePlayPause();
+          break;
+        case 38: 
+          handleVolumeChange(null, Math.min(volume * 100 + 10, 100));
+          break;
+        case 40: 
+          handleVolumeChange(null, Math.max(volume * 100 - 10, 0));
+          break;
+        case 39: 
+          handleFastForward();
+          break;
+        case 37: 
+          handleRewind();
+          break;
+        case 77: 
+          handleMute();
+          break;
+        case 70: 
+          toggleFullScreen();
+          break;
+        case 27: 
+          if (screenfull.isFullscreen) {
+            toggleFullScreen();
+          }
+          break;
+        case 78:
+          handleNextVideo();
+          break;
+        case 80: 
+          handlePreviousVideo();
+          break;
+        default:
+          break;
       }
-    }, 1000); 
+    };
 
-    return () => clearInterval(intervalId);
-  }, [playing, state.seeking]);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handlePlayPause, handleVolumeChange, handleFastForward, handleRewind, handleMute, toggleFullScreen, handleNextVideo, handlePreviousVideo]);
 
   const currentTime = playerRef.current ? playerRef.current.getCurrentTime() : '00:00';
   const duration = playerRef.current ? playerRef.current.getDuration() : '00:00';
@@ -200,8 +218,7 @@ function App() {
       </AppBar>
       <Toolbar />
       <Container maxWidth='md'>
-        <PlayerWrapper ref={playerContainerRef}
-          onMouseMove={handleMouseMove}>
+        <PlayerWrapper ref={playerContainerRef}>
           <ReactPlayer
             ref={playerRef}
             width={'100%'}
