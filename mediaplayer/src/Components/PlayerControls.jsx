@@ -16,6 +16,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import FullScreenIcon from '@mui/icons-material/FullScreen';
 import Popover from '@mui/material/Popover';
 import VolumeOff from '@mui/icons-material/VolumeOff';
+import MinimizeIcon from '@mui/icons-material/Minimize'; 
 
 const ControlWrapper = styled('div')({
   position: 'absolute',
@@ -83,11 +84,12 @@ const PlayControls = React.forwardRef(({
   onChangeDisplayFormat,
   onBookmark,
   onNextVideo,
-  onPreviousVideo
+  onPreviousVideo,
+  onToggleMinimize 
 }, ref) => {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [seekValue, setSeekValue] = useState(played * 100);
+  // const [seekValue, setSeekValue] = useState(played * 100);
   const [volumeValue, setVolumeValue] = useState(volume * 100);
 
   const handlePopover = (event) => {
@@ -134,7 +136,7 @@ const PlayControls = React.forwardRef(({
         direction='row'
         alignItems='center'
         justify='center'
-        style={{ marginLeft: '35%' }}
+        style={{ marginLeft: '37%' }}
       >
         
 
@@ -232,18 +234,26 @@ const PlayControls = React.forwardRef(({
               </Button>
             ))}
           </Popover>
-          <BottomIcons onClick={onToggleFullScreen}>
+          
+        </Grid>
+        
+        
+        {/* Minimize button */}
+        <BottomIcons onClick={onToggleMinimize}>
+          <MinimizeIcon fontSize='large' />
+        </BottomIcons>
+        
+        <BottomIcons onClick={onPreviousVideo} aria-label='next'>
+          <SkipPreviousIcon fontSize='inherit' />
+        </BottomIcons>
+
+        <BottomIcons onClick={onNextVideo} aria-label='next'>
+          <SkipNextIcon fontSize='inherit' />
+        </BottomIcons>
+
+        <BottomIcons onClick={onToggleFullScreen}>
             <FullScreenIcon fontSize='large' />
           </BottomIcons>
-        </Grid>
-
-        <ControlVideoIcons onClick={onPreviousVideo} aria-label='previous'>
-          <SkipPreviousIcon fontSize='inherit' />
-        </ControlVideoIcons>
-
-        <ControlVideoIcons onClick={onNextVideo} aria-label='next'>
-          <SkipNextIcon fontSize='inherit' />
-        </ControlVideoIcons>
 
       </Grid>
     </ControlWrapper>

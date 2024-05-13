@@ -38,12 +38,13 @@ function App() {
     played: 0,
     seeking: false,
     currentVideoIndex: 0,
+    minimized: false, 
   });
 
   const [timeDisplayFormat, setTimeDisplayFormat] = useState('normal');
   const [bookmarks, setBookmarks] = useState([]);
 
-  const { playing, muted, volume, playbackRate, played, currentVideoIndex } = state;
+  const { playing, muted, volume, playbackRate, played, currentVideoIndex, minimized } = state;
 
   const playerRef = useRef(null);
   const playerContainerRef = useRef(null);
@@ -156,6 +157,10 @@ function App() {
     }));
   };
 
+  const toggleMinimize = () => {
+    setState({ ...state, minimized: !minimized });
+  };
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       switch (event.keyCode) {
@@ -191,6 +196,9 @@ function App() {
         case 80: 
           handlePreviousVideo();
           break;
+        case 87: 
+          toggleMinimize(); 
+          break;
         default:
           break;
       }
@@ -201,7 +209,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handlePlayPause, handleVolumeChange, handleFastForward, handleRewind, handleMute, toggleFullScreen, handleNextVideo, handlePreviousVideo]);
+  }, [handlePlayPause, handleVolumeChange, handleFastForward, handleRewind, handleMute, toggleFullScreen, handleNextVideo, handlePreviousVideo, toggleMinimize]);
 
   const currentTime = playerRef.current ? playerRef.current.getCurrentTime() : '00:00';
   const duration = playerRef.current ? playerRef.current.getDuration() : '00:00';
@@ -218,52 +226,76 @@ function App() {
       </AppBar>
       <Toolbar />
       <Container maxWidth='md'>
-        <PlayerWrapper ref={playerContainerRef}>
-          <ReactPlayer
-            ref={playerRef}
-            width={'100%'}
-            height={'100%'}
-            url={videos[currentVideoIndex]} 
-            muted={muted}
-            playing={playing}
-            volume={volume}
-            playbackRate={playbackRate}
-            onProgress={handleProgress}
-            config={{
-              file: {
-                attributes: {
-                  crossOrigin: 'anonymous',
+        {minimized ? ( 
+          <PlayerWrapper ref={playerContainerRef} style={{ position: 'fixed', bottom: 0, right: 0, width: 300 }}>
+            <ReactPlayer
+              ref={playerRef}
+              width={'100%'}
+              height={'100%'}
+              url={videos[currentVideoIndex]}
+              muted={muted}
+              playing={playing}
+              volume={volume}
+              playbackRate={playbackRate}
+              onProgress={handleProgress}
+              config={{
+                file: {
+                  attributes: {
+                    crossOrigin: 'anonymous',
+                  },
                 },
-              },
-            }}
-          />
+              }}
+            />
+          </PlayerWrapper>
+        ) : (
+          <PlayerWrapper ref={playerContainerRef}>
+            <ReactPlayer
+              ref={playerRef}
+              width={'100%'}
+              height={'100%'}
+              url={videos[currentVideoIndex]} 
+              muted={muted}
+              playing={playing}
+              volume={volume}
+              playbackRate={playbackRate}
+              onProgress={handleProgress}
+              config={{
+                file: {
+                  attributes: {
+                    crossOrigin: 'anonymous',
+                  },
+                },
+              }}
+            />
 
-          <PlayerControls
-            ref={controlsRef}
-            onPlayPause={handlePlayPause}
-            playing={playing}
-            onRewind={handleRewind}
-            onFastForward={handleFastForward}
-            muted={muted}
-            onMute={handleMute}
-            onVolumeChange={handleVolumeChange}
-            onVolumeSeekUp={handleVolumeSeekUp}
-            volume={volume}
-            playbackRate={playbackRate}
-            onPlaybackRateChange={handlePlaybackRateChange}
-            onToggleFullScreen={toggleFullScreen}
-            played={played}
-            onSeek={handleSeekChange}
-            onSeekMouseDown={handleSeekMouseDown}
-            onSeekMouseUp={handleSeekMouseUp}
-            elapsedTime={elapsedTime}
-            totalDuration={totalDuration}
-            onChangeDisplayFormat={handleChangeDisplayFormat}
-            onBookmark={addBookmark}
-            onNextVideo={handleNextVideo} 
-            onPreviousVideo={handlePreviousVideo} 
-          />
-        </PlayerWrapper>
+            <PlayerControls
+              ref={controlsRef}
+              onPlayPause={handlePlayPause}
+              playing={playing}
+              onRewind={handleRewind}
+              onFastForward={handleFastForward}
+              muted={muted}
+              onMute={handleMute}
+              onVolumeChange={handleVolumeChange}
+              onVolumeSeekUp={handleVolumeSeekUp}
+              volume={volume}
+              playbackRate={playbackRate}
+              onPlaybackRateChange={handlePlaybackRateChange}
+              onToggleFullScreen={toggleFullScreen}
+              played={played}
+              onSeek={handleSeekChange}
+              onSeekMouseDown={handleSeekMouseDown}
+              onSeekMouseUp={handleSeekMouseUp}
+              elapsedTime={elapsedTime}
+              totalDuration={totalDuration}
+              onChangeDisplayFormat={handleChangeDisplayFormat}
+              onBookmark={addBookmark}
+              onNextVideo={handleNextVideo} 
+              onPreviousVideo={handlePreviousVideo} 
+              onToggleMinimize={toggleMinimize}
+            />
+          </PlayerWrapper>
+        )}
 
         <Grid container style={{ marginTop: 20 }} spacing={3}>
           {bookmarks.map((bookmark, index) => (
