@@ -17,6 +17,7 @@ import FullScreenIcon from '@mui/icons-material/FullScreen';
 import Popover from '@mui/material/Popover';
 import VolumeOff from '@mui/icons-material/VolumeOff';
 import MinimizeIcon from '@mui/icons-material/Minimize'; 
+import CircularProgress from '@mui/material/CircularProgress';
 
 const ControlWrapper = styled('div')({
   position: 'absolute',
@@ -85,7 +86,8 @@ const PlayControls = React.forwardRef(({
   onBookmark,
   onNextVideo,
   onPreviousVideo,
-  onToggleMinimize 
+  onToggleMinimize,
+  loading
 }, ref) => {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -254,6 +256,14 @@ const PlayControls = React.forwardRef(({
         <BottomIcons onClick={onToggleFullScreen}>
             <FullScreenIcon fontSize='large' />
           </BottomIcons>
+        
+        {/* Loading overlay */}
+
+            {loading && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <CircularProgress color="secondary" />
+            </div>
+            )}
 
       </Grid>
     </ControlWrapper>

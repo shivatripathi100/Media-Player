@@ -9,6 +9,7 @@ import PlayerControls from './Components/PlayerControls';
 import screenfull from 'screenfull';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const PlayerWrapper = styled('div')({
   width: '100%',
@@ -41,12 +42,13 @@ function App() {
     seeking: false,
     currentVideoIndex: 0,
     minimized: false, 
+    loading: true,
   });
 
   const [timeDisplayFormat, setTimeDisplayFormat] = useState('normal');
   const [bookmarks, setBookmarks] = useState([]);
 
-  const { playing, muted, volume, playbackRate, played, seeking, currentVideoIndex, minimized } = state;
+  const { playing, muted, volume, playbackRate, played, seeking, currentVideoIndex, minimized, loading } = state;
 
   const playerRef = useRef(null);
   const playerContainerRef = useRef(null);
@@ -272,7 +274,14 @@ function App() {
                   },
                 },
               }}
+              onBuffer={() => setState({ ...state, loading: true })} 
+              onBufferEnd={() => setState({ ...state, loading: false })} 
             />
+            {loading && ( 
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <CircularProgress color="secondary" />
+              </div>
+            )}
           </PlayerWrapper>
         ) : (
           <PlayerWrapper ref={playerContainerRef} onMouseMove={handleMouseMove}>
@@ -293,6 +302,8 @@ function App() {
                   },
                 },
               }}
+              onBuffer={() => setState({ ...state, loading: true })} 
+              onBufferEnd={() => setState({ ...state, loading: false })} 
             />
 
             <PlayerControls
@@ -320,6 +331,7 @@ function App() {
               onNextVideo={handleNextVideo} 
               onPreviousVideo={handlePreviousVideo} 
               onToggleMinimize={toggleMinimize}
+              loading={loading}
             />
           </PlayerWrapper>
         )}
