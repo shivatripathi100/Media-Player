@@ -89,7 +89,7 @@ const PlayControls = React.forwardRef(({
 }, ref) => {
 
   const [anchorEl, setAnchorEl] = React.useState(null);
-  // const [seekValue, setSeekValue] = useState(played * 100);
+  const [seekValue, setSeekValue] = useState(played * 100);
   const [volumeValue, setVolumeValue] = useState(volume * 100);
 
   const handlePopover = (event) => {

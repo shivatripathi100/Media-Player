@@ -29,6 +29,8 @@ const format = (seconds) => {
   return `${mm}:${ss}`;
 };
 
+let count = 0;
+
 function App() {
   const [state, setState] = useState({
     playing: true,
@@ -44,7 +46,7 @@ function App() {
   const [timeDisplayFormat, setTimeDisplayFormat] = useState('normal');
   const [bookmarks, setBookmarks] = useState([]);
 
-  const { playing, muted, volume, playbackRate, played, currentVideoIndex, minimized } = state;
+  const { playing, muted, volume, playbackRate, played, seeking, currentVideoIndex, minimized } = state;
 
   const playerRef = useRef(null);
   const playerContainerRef = useRef(null);
@@ -95,6 +97,13 @@ function App() {
   };
 
   const handleProgress = (changeState) => {
+    if (count > 2) {
+      controlsRef.current.style.visibility = "hidden";
+      count = 0;
+    }
+    if (controlsRef.current.style.visibility == "visible") {
+      count += 1;
+    }
     if (!state.seeking) {
       setState({ ...state, ...changeState });
     }
@@ -111,6 +120,11 @@ function App() {
   const handleSeekMouseUp = (e, newValue) => {
     setState({ ...state, seeking: false });
     playerRef.current.seekTo(newValue / 100, 'fraction');
+  };
+
+  const handleMouseMove = () => {
+    controlsRef.current.style.visibility = "visible";
+    count = 0;
   };
 
   const handleChangeDisplayFormat = () => {
@@ -156,6 +170,19 @@ function App() {
       currentVideoIndex: (prevState.currentVideoIndex - 1 + videos.length) % videos.length,
     }));
   };
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!state.seeking && playing) {
+        setState((prevState) => ({
+          ...prevState,
+          played: playerRef.current.getCurrentTime() / playerRef.current.getDuration(),
+        }));
+      }
+    }, 1000); 
+
+    return () => clearInterval(intervalId);
+  }, [playing, state.seeking]);
 
   const toggleMinimize = () => {
     setState({ ...state, minimized: !minimized });
@@ -227,7 +254,7 @@ function App() {
       <Toolbar />
       <Container maxWidth='md'>
         {minimized ? ( 
-          <PlayerWrapper ref={playerContainerRef} style={{ position: 'fixed', bottom: 0, right: 0, width: 300 }}>
+          <PlayerWrapper ref={playerContainerRef} onMouseMove={handleMouseMove} style={{ position: 'fixed', bottom: 0, right: 0, width: 300 }}>
             <ReactPlayer
               ref={playerRef}
               width={'100%'}
@@ -248,7 +275,7 @@ function App() {
             />
           </PlayerWrapper>
         ) : (
-          <PlayerWrapper ref={playerContainerRef}>
+          <PlayerWrapper ref={playerContainerRef} onMouseMove={handleMouseMove}>
             <ReactPlayer
               ref={playerRef}
               width={'100%'}
